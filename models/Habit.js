@@ -1,9 +1,9 @@
-const express = require("express");
+
 const mongoose = require("mongoose");
 
 // Definición del modelo de hábito *es como crear la cosa en el jsx para entender mas facil*
 const habitSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true,
   },
@@ -11,10 +11,10 @@ const habitSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  completed: {
-    type: Boolean,
-    default: false,
+  createdAt: {
+    type:  Date,
+    default: Date.now(),
   },
 });
 
-const Habit = mongoose.model("Habit", habitSchema);
+module.exports = mongoose.model("Habit", habitSchema);

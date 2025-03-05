@@ -1,24 +1,9 @@
+require("./config/database"); //para acceder al archivo con la configuracion de conexion a mongodb
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const mongoose = require("mongoose");
-const habitRouter = require('./routes/index');
-
-
-// Conexión a MongoDB
-const dbURI =
-  "mongodb+srv://dinamrivera08:IX9bftXvOt8Nh11O@cluster0.bjpkt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-mongoose
-  .connect(dbURI)
-  .then(() => {
-    console.log("Conectado a MongoDB - habitosApp");
-  })
-  .catch((err) => {
-    console.error("Error al conectar a MongoDB:", err);
-  });
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -37,8 +22,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/habits", habitRouter); // Aquí estoy poniendo la ruta de hábitos
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -54,8 +37,3 @@ app.use(function (err, req, res, next) {
 });
 
 module.exports = app;
-
-// Iniciar el servidor
-app.listen(5000, () => {
-  console.log("Servidor corriendo en http://localhost:5000");
-});
