@@ -1,7 +1,8 @@
 import { useSelector, useDispatch } from "react-redux";
-import { markAsDoneThunk } from "@/features/habit/habitSlice";
+import { fetchAddHabitThunk, markAsDoneThunk } from "@/features/habit/habitSlice";
 import { AppState, AppDispatch } from "../Redux/store";
 import { fetchHabitsThunk } from "@/features/habit/habitSlice";
+import {useState} from "react";
 
 type Habits = {
   _id: string;
@@ -18,17 +19,31 @@ type HabitsProps = {
   habits: Habits[];
 };
 
-const handleMarkAsDone = (dispatch: AppDispatch, habitId: string) => {
-  dispatch(markAsDoneThunk(habitId));
-  dispatch(fetchHabitsThunk());
+const handleMarkAsDone = (habitId: string, dispatch: AppDispatch, token:string) => {
+  dispatch(markAsDoneThunk({habitId, token}));
+  if (token){
+  dispatch(fetchHabitsThunk(token));}
 };
 export default function Habits({ habits }: HabitsProps) {
   const dispatch = useDispatch<AppDispatch>();
   const status = useSelector((state: AppState) => state.habit.status);
   const error = useSelector((state: AppState) => state.habit.error);
+  const user = useSelector((state: AppState) => state.user.user);
+  const [title,setTitle] = useState("");
+  const [description,setDescription] = useState("");
+
   const calculateProgress = (days: number): number => {
     return Math.min((days / 66) * 100, 100);
   };
+
+  const handleAddHabi = () =>{
+    if (title && description){
+      dispatch(fetchAddHabitThunk({token:user?user.toString():"", title, description}));
+      setTitle("");
+      setDescription("");
+      dispatch(fetchHabitsThunk(user?user.toString():""));
+    }
+  }
 
   return (
     <div className="p-3 bg-gradient-to-r from-slate-600 to-slate-700 divide-y divide-white w-120 rounded-2xl shadow-lg mt-1">
@@ -46,7 +61,7 @@ export default function Habits({ habits }: HabitsProps) {
           ></progress>
           <button
             className="text-slate-100 w-1/2 mx-auto bg-rose-300 border border-slate-400 hover:border-transparent hover:bg-rose-400 hover:text-slate-100 active:bg-rose-700 rounded-md p-2 m-2"
-            onClick={() => handleMarkAsDone(dispatch, habit._id)}
+            onClick={() => handleMarkAsDone(habit._id,dispatch, user?user.toString():"")}
           >
             {status[habit._id] === "loading" ? "Processing..." : "Mark as Done"}
           </button>

@@ -1,6 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const Habit = require("../models/Habit"); // Incluyo esto para acceder a este archivo del habit.
+const jwt = require("jsonwebtoken"); // importo la libreria de jsonwebtoken
+const mongoose = require("mongoose"); // importo la libreria de mongoose para hacer la referencia al objectID
+
+// hago constante para la funcion de middleware para evaluar peticiones al backend que tenga jwt
+const authenticateToken = (req, res, next) => {
+  const token = req.header("Authorization"); //obtengo el token del header de la peticion
+  if (!token) {
+    return res.status(401).json({ error: "Access denied. Token not provided." });
+  }
+  try {
+    const tokenWithoutBearer = token.replace("Bearer ", ""); //eliminamos el Bearer del token
+    const verified = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET); //verificamos el token
+    req.user = verified; //guardamos el token verificado en la request es decir los datos del usuario
+    next(); //llamamos al siguiente middleware o digamos para seguir el flujo
+  } catch (error) {
+    console.error(error);
+    res.status(403).json({ error: "Invalid or expired token." });
+  }
+};
 
 // GET home page
 router.get("/", function (req, res, next) {
@@ -8,9 +27,10 @@ router.get("/", function (req, res, next) {
 });
 
 // GET habits page
-router.get("/habits", async (req, res) => {
+router.get("/habits", authenticateToken, async (req, res) => {
   try {
-    const habits = await Habit.find();
+    let userId = req.user && req.user.userId ? req.user.userId : res.status(500).json({ message: "Error retrieving habits." });
+    const habits = await Habit.find({"userId": new mongoose.Types.ObjectId(userId)});
     res.json(habits);
   } catch (err) {
     res.status(500).json({ message: "Error retrieving habits page." });
@@ -20,13 +40,15 @@ router.get("/habits", async (req, res) => {
 //aca agregare mis endpoints solicitados para agregar, editar y borrar habitos
 
 // POST para crear un hábito (endpoint post)
-router.post("/habits", async (req, res) => {
+router.post("/habits", authenticateToken, async (req, res) => {
   try {
     const { title, description } = req.body;
-    const habit = new Habit({
-      title,
-      description,
-    });
+    let userId =
+      req.user && req.user.userId
+        ? req.user.userId
+        : res.status(500).json({ message: "Error adding habit." });
+    userId = new mongoose.Types.ObjectId(userId);
+    const habit = new Habit({ title, description, userId});
     await habit.save();
     res.json(habit); // Respuesta con el hábito creado
   } catch (err) {
@@ -35,7 +57,7 @@ router.post("/habits", async (req, res) => {
 });
 
 // Eliminar un hábito por ID (DELETE request de https)
-router.delete("/habits/:id", async (req, res) => {
+router.delete("/habits/:id", authenticateToken, async (req, res) => {
   try {
     await Habit.findByIdAndDelete(req.params.id);
     res.json({ message: "Habit Deleted successfully." });
@@ -45,7 +67,7 @@ router.delete("/habits/:id", async (req, res) => {
 });
 
 // Editar un hábito por ID (PUT request de https)
-router.put("/habits/:id", async (req, res) => {
+router.put("/habits/:id", authenticateToken, async (req, res) => {
   try {
     const habit = await Habit.findByIdAndUpdate(
       req.params.id, //es el ID que obtengo del URL
@@ -65,7 +87,7 @@ router.patch("/habits/markasdone/:id", async (req, res) => {
     const habit = await Habit.findById(req.params.id);
     habit.lastDone = new Date();
     if (timeDifferenceInHours(habit.lastDone, habit.lastUpdate) < 24) {
-      habit.days = 1+timeDifferenceInDays(habit.lastDone,habit.startedAt);
+      habit.days = 1 + timeDifferenceInDays(habit.lastDone, habit.startedAt);
       habit.lastUpdate = new Date();
       habit.save();
       res.status(200).json({ message: "Habit marked as done." });
