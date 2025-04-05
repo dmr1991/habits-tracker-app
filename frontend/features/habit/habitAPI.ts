@@ -6,7 +6,6 @@ export const fetchHabits = async (token: string) => {
     throw new Error("Failed to fetch habits.");
   }
   return response.json();
-
 };
 
 export const fetchAddHabit = async (
@@ -16,11 +15,14 @@ export const fetchAddHabit = async (
 ) => {
   const response = await fetch("http://localhost:5000/habits", {
     method: "POST",
-    headers: { Authorization: "Bearer " + token, 'Content-Type': "application/json" },
-    body: JSON.stringify({"title": title, "description": description }),
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title: title, description: description }),
   });
   if (!response.ok) {
     throw new Error("Failed to add new habit.");
   }
-  return response.json();
+  return response;
 };

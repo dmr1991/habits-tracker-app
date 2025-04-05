@@ -21,13 +21,29 @@ export default function Home() {
   useEffect(() => {
     const token = getCookie("habitToken");
     if (token) {
+      console.log("Token encontrado: ", token); // Verificar si el token existe
+      dispatch(addUser(token));  // Agregar al estado de Redux
+    }
+  }, [dispatch]);
+  
+  useEffect(() => {
+    if (user) {
+      console.log("User disponible: ", user); // Verificar que el `user` se está actualizando
+      console.log("Dispatching fetchHabitsThunk con user: ", user); // Verifica si se está despachando la acción correctamente
+      dispatch(fetchHabitsThunk(user.toString())); // Llamar a la acción para obtener los hábitos
+    }
+  }, [user, dispatch]);
+/* 
+  useEffect(() => {
+    const token = getCookie("habitToken");
+    if (token) {
       dispatch(addUser(token));
     }
     if (user) {
       dispatch(fetchHabitsThunk(user.toString()));
     }
   }, [dispatch, user]);
-
+ */
   const handleLogin = () => {
     dispatch(fetchLoginUserThunk({ username, password }));
   };
@@ -56,13 +72,13 @@ export default function Home() {
           />
           <button
             onClick={handleLogin}
-            className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="text-slate-100 w-1/3 mx-auto bg-rose-300 border border-slate-400 hover:border-transparent hover:bg-rose-400 hover:text-slate-100 active:bg-rose-700 rounded-md p-2 m-2"
           >
             Login
           </button>
           <button
             onClick={handleRegister}
-            className="w-full px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600"
+            className="text-slate-100 w-1/3 mx-auto bg-rose-300 border border-slate-400 hover:border-transparent hover:bg-rose-400 hover:text-slate-100 active:bg-rose-700 rounded-md p-2 m-2"
           >
             Register
           </button>

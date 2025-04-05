@@ -14,13 +14,13 @@ type Habit = {
 
 type markAsDoneThunkParams = {
   habitId: string;
-  token: string;
+  token: string
 };
 
 type addHabitThunkParams = {
   token: string;
   title: string;
-  description: string;
+  description: string
 };
 
 type HabitState = {
@@ -39,6 +39,7 @@ export const fetchHabitsThunk = createAsyncThunk(
   "habit/fetchHabits",
   async (token: string, { rejectWithValue }) => {
     const response = await fetchHabits(token);
+    console.log("Response from API fetchHabits:", response); // Agrega este log para depuración
     const responseJson = await response.json();
     if (!response.ok) {
       return rejectWithValue("Failed to fetch habits.");
@@ -75,10 +76,10 @@ export const fetchAddHabitThunk = createAsyncThunk(
     const responseJson = await response.json();
     if (!response.ok) {
       return rejectWithValue("Failed to add Habit.");
-    } else if (responseJson.message.toString() === "Error creating habi.") {
+    } else if (responseJson?.message?.toString() === "Error creating habit.") {
       return rejectWithValue(responseJson.message);
     } else {
-      return responseJson.token;
+      return responseJson;
     }
   }
 );
@@ -102,6 +103,7 @@ const habitSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchHabitsThunk.fulfilled, (state, action) => {
+        console.log("Habits loaded:", action.payload);  // Agrega este log para depuración
         state.habits = action.payload;
       })
       .addCase(markAsDoneThunk.fulfilled, (state, action) => {
@@ -113,7 +115,12 @@ const habitSlice = createSlice({
         state.error[action.meta.arg.habitId] = action.payload as string;
       })
       .addCase(fetchAddHabitThunk.fulfilled, (state, action) => {
+        console.log(action)
         state.habits.push(action.payload);
+      }).addCase(fetchAddHabitThunk.rejected, (state, action) => {
+        state.status[action.meta.arg.title] = "failed";  // Usamos el título para identificar el estado de error
+        state.error[action.meta.arg.title] = action.error.message || "Error adding habit";
+        console.error('Error adding habit:', action.error); // Verifica en la consola el error
       });
   },
 });

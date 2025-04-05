@@ -6,7 +6,7 @@ interface userThunk {
   password: string;
 }
 type user = {
-  token: string;
+  user: string;
 };
 type userState = {
   user: user | null;
@@ -86,8 +86,8 @@ const userSlice = createSlice({
       })
       .addCase(fetchLoginUserThunk.fulfilled, (state, action) => {
         state.status = "success";
-        state.user = null;
-        state.error = action.payload as string;
+        state.user = {user:action.payload}; // lo corregi para resolver lo del token -- update aca
+        state.error = null;
       });
   },
 });
