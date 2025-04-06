@@ -52,7 +52,7 @@ export const markAsDoneThunk = createAsyncThunk(
   "habit/markAsDone",
   async ({ habitId, token }: markAsDoneThunkParams, { rejectWithValue }) => {
     const response = await fetch(
-      `http://localhost:5000/habits/markasdone/${habitId}`,
+      `https://backend-habitstracker-app.vercel.app/habits/markasdone/${habitId}`,
       { method: "PATCH", headers: { Authorizaion: "Bearer " + token } }
     );
     const responseJson = await response.json();

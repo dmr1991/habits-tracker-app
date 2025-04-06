@@ -12,7 +12,7 @@ const usersRouter = require("./routes/users");
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://frontend-habitstracker-app.vercel.app",
     credentials: true,
   })
 );

@@ -1,7 +1,7 @@
 // register user
 
 export const fetchRegisterUser = async (username: string, password: string) => {
-  const response = await fetch("http://localhost:5000/users/register", {
+  const response = await fetch("https://backend-habitstracker-app.vercel.app/users/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: username, password: password }),
@@ -14,7 +14,7 @@ export const fetchRegisterUser = async (username: string, password: string) => {
 
 
 export const fetchLoginUser = async (username: string, password: string) => {
-          const response = await fetch("http://localhost:5000/users/login", {
+          const response = await fetch("https://backend-habitstracker-app.vercel.app/users/login", {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
